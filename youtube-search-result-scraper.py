@@ -23,7 +23,7 @@ for result_video in result_videos:
     video_urls += ['http://www.youtube.com' + href]
 
     # Download all videos
-    ydl = youtube_dl.YoutubeDL({'outtmpl': title})
+    ydl = youtube_dl.YoutubeDL({'outtmpl': 'videos/'+title})
 
     with ydl:
         result = ydl.extract_info(url)

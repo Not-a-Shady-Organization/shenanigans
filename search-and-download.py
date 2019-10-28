@@ -23,9 +23,12 @@ for result_video in result_videos:
     video_urls += ['http://www.youtube.com' + href]
 
     # Download all videos
-    ydl = youtube_dl.YoutubeDL({'outtmpl': 'videos/'+title})
+    ydl = youtube_dl.YoutubeDL({
+        'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title,
+        'playlist': False
+    })
 
     with ydl:
         result = ydl.extract_info(url)
 
-#    ffmpeg_command = f'ffmpeg -i {} -c copy -an example-nosound.mkv'
+    print(title)

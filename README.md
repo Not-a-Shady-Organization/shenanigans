@@ -7,3 +7,5 @@ Create very long, very odd videos in minutes using Creative Commons Blender.
 Download necessary Python3 packages
 
 `pip install -r requirements.txt`
+
+And install [FFMPEG](https://www.ffmpeg.org/download.html)

@@ -31,7 +31,7 @@ def search_and_download(search_terms):
 
         # Download all videos
         ydl = youtube_dl.YoutubeDL({
-            'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title,
+            'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title.replace(' ', '_'),
             'playlist': False
         })
 

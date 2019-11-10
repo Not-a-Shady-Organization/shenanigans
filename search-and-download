@@ -57,24 +57,25 @@ def search_and_download(search_terms, count, creative_commons, res_4k, res_hd):
 
         # Download
         ydl = youtube_dl.YoutubeDL({
-            'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title.replace(' ', '_').replace('"', '').replace("'", '').replace('(', '').replace(')', ''),
-            'noplaylist': True
+            'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title.replace(' ', '_').replace('"', '').replace("'", '').replace('(', '').replace(')', '').replace('|', ''),
+            'noplaylist': True,
+            'writethumbnail': True
+#            'progress_hooks': [hook]
 #            'logger': Logger()
         })
 
         with ydl:
             result = ydl.extract_info(video_url)
 
+def hook(d):
+    if d['status'] == 'downloading':
+        print('downloading')
+
 
 class Logger(object):
     def debug(self, msg):
         if '[download]' in msg:
-            if 'already' in msg or 'Download' in msg:
-                return
-            if 'playlist' in msg or 'Destination' in msg:
-                print(msg)
-            else:
-                sys.stdout.write(msg)
+            sys.stdout.write(msg)
 
     def warning(self, msg):
         pass

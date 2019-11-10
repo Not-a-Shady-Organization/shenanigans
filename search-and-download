@@ -22,13 +22,13 @@ def search_and_download(search_terms, creative_commons, res_4k):
     resolution_4k_filter = '&sp=EgJwAQ%253D%253D'
     creative_commons_4k_filter = '&sp=EgQwAXAB'
 
-    url = ''
+    url = base_url + '+'.join(search_terms)
     if creative_commons:
-        url = base_url + '+'.join(search_terms) + creative_commons_filter
+        url += creative_commons_filter
     if res_4k:
-        url = base_url + '+'.join(search_terms) + resolution_4k_filter
+        url += resolution_4k_filter
     if creative_commons and res_4k:
-        url = base_url + '+'.join(search_terms) + creative_commons_4k_filter
+        url += creative_commons_4k_filter
 
     page = requests.get(url)
 

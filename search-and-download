@@ -51,11 +51,30 @@ def search_and_download(search_terms, creative_commons, res_4k, res_hd):
         # Download all videos
         ydl = youtube_dl.YoutubeDL({
             'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title.replace(' ', '_').replace('"', '').replace("'", ''),
-            'playlist': False
+            'playlist': False,
+            'logger': Logger()
         })
 
         with ydl:
             result = ydl.extract_info(url)
+
+
+class Logger(object):
+    def debug(self, msg):
+        if '[download]' in msg:
+            if 'already' in msg or 'Download' in msg:
+                return
+            if 'playlist' in msg or 'Destination' in msg:
+                print(msg)
+            else:
+                sys.stdout.write(msg)
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        print(msg)
+
 
 if __name__ == '__main__':
     search_and_download()

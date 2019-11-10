@@ -11,12 +11,24 @@ import click
 
 @click.command()
 @click.argument('search_terms', nargs=-1)
-def search_and_download(search_terms):
+@click.option('--creative-commons', is_flag=True)
+@click.option('--res-4k', is_flag=True)
+def search_and_download(search_terms, creative_commons, res_4k):
     '''This script searchs for videos Youtube for Creative Commons which match the given terms, then downloads them.'''
 
     base_url = 'https://www.youtube.com/results?search_query='
+
     creative_commons_filter = '&sp=EgIwAQ%253D%253D'
-    url = base_url + '+'.join(search_terms) + creative_commons_filter
+    resolution_4k_filter = '&sp=EgJwAQ%253D%253D'
+    creative_commons_4k_filter = '&sp=EgQwAXAB'
+
+    url = ''
+    if creative_commons:
+        url = base_url + '+'.join(search_terms) + creative_commons_filter
+    if res_4k:
+        url = base_url + '+'.join(search_terms) + resolution_4k_filter
+    if creative_commons and res_4k:
+        url = base_url + '+'.join(search_terms) + creative_commons_4k_filter
 
     page = requests.get(url)
 

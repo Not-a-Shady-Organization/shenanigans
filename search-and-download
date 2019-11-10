@@ -26,30 +26,36 @@ def search_and_download(search_terms, count, creative_commons, res_4k, res_hd):
     resolution_HD_filter = '&sp=EgIgAQ%253D%253D'
     creative_commons_HD_filter = '&sp=EgQgATAB'
 
-    url = base_url + '+'.join(search_terms)
+    # Create URL for the Youtube video search
+    youtube_search_url = ''
     if creative_commons:
-        url += creative_commons_filter
+        youtube_search_url = base_url + '+'.join(search_terms) + creative_commons_filter
     if res_4k:
-        url += resolution_4k_filter
+        youtube_search_url = base_url + '+'.join(search_terms) + resolution_4k_filter
     if res_hd:
-        url += resolution_HD_filter
+        youtube_search_url = base_url + '+'.join(search_terms) + resolution_HD_filter
     if creative_commons and res_4k:
-        url += creative_commons_4k_filter
+        youtube_search_url = base_url + '+'.join(search_terms) + creative_commons_4k_filter
     if creative_commons and res_hd:
-        url += creative_commons_HD_filter
+        youtube_search_url = base_url + '+'.join(search_terms) + creative_commons_HD_filter
+    if youtube_search_url == '':
+        youtube_search_url = base_url + '+'.join(search_terms)
 
-    page = requests.get(url)
+    # Request the search page from Youtube
+    page = requests.get(youtube_search_url)
 
+    # List all video elements on the search results page
     soup = BeautifulSoup(page.content, 'html.parser')
     result_videos = soup.select('.yt-lockup-title')
 
     for result_video in result_videos[:int(count)]:
+        # Grab title and link for each video in the results
         result_title_element = result_video.find('a')
         title = result_title_element['title']
         href = result_title_element['href']
         video_url = 'http://www.youtube.com' + href
 
-        # Download all videos
+        # Download
         ydl = youtube_dl.YoutubeDL({
             'outtmpl': 'videos/' + '_'.join(search_terms) + '/' + title.replace(' ', '_').replace('"', '').replace("'", '').replace('(', '').replace(')', ''),
             'noplaylist': True

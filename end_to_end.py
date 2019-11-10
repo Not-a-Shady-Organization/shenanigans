@@ -6,90 +6,110 @@ import sys
 import click
 import yaml
 import os
+from search_and_download import search_and_download
 
-
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 @click.command()
-@click.argument('yaml_file')
-def download(yaml_file):
+@click.argument('yaml-file')
+@click.option('--not-blend', is_flag=True)
+@click.option('--not-upload', is_flag=True)
+def download(yaml_file, not_blend, not_upload):
+    print_creative_commons_blender()
+
     with open(yaml_file) as f:
         flags = yaml.full_load(f)
 
-    print(flags)
-    args = ''
-    try: 
-        flags['video']['search_terms']
-        args += flags['video']['search_terms']
-    except:
-        print("yaml must have search terms")
-
-    if flags['video']['count']:
-        args += ' --count ' + str(flags['video']['count'])
-
-    if flags['video']['creative_commons']:
-        args += ' --creative-commons'
-
-    if flags['video']['res_4k']:
-        args += ' --res-4k'
-
-    if flags['video']['res_HD']:
-        args += ' --res-HD'
-
     video_path_dir = os.path.dirname(os.path.realpath(__file__)) + '/videos/' + flags['video']['search_terms'].replace(" ", '_')
+    downloaded_videos = search_and_download(
+        flags['video']['search_terms'],
+        flags['video']['count'],
+        flags['video']['creative_commons'],
+        flags['video']['res_4k'],
+        flags['video']['res_HD']
+    )
 
-    command = f'python3 search-and-download {args}'
-    check_output(command, shell=True)
     filepaths = os.listdir(video_path_dir)
+    video_path = video_path_dir + '/' + best_video(filepaths)
 
-    video_path = ''
-    for fp in filepaths:
-        if '.webm' in fp:
-            video_path = fp
-        if '.mkv' in fp:
-            video_path = fp
-    video_path = video_path_dir + '/' + video_path
-
-
-    args = ''
-    try: 
-        flags['audio']['search_terms']
-        args += flags['audio']['search_terms']
-    except:
-        print("yaml must have search terms")
-
-    if flags['audio']['count']:
-        args += ' --count ' + str(flags['audio']['count'])
-
-    if flags['audio']['creative_commons']:
-        args += ' --creative-commons'
-
-    if flags['audio']['res_4k']:
-        args += ' --res-4k'
-
-    if flags['audio']['res_HD']:
-        args += ' --res-HD'
 
     audio_path_dir = os.path.dirname(os.path.realpath(__file__)) + '/videos/' + flags['audio']['search_terms'].replace(" ", '_')
+    search_and_download(
+        flags['audio']['search_terms'],
+        flags['audio']['count'],
+        flags['audio']['creative_commons'],
+        flags['audio']['res_4k'],
+        flags['audio']['res_HD']
+    )
 
-    command = f'python3 search-and-download {args}'
-    check_output(command, shell=True)
     filepaths = os.listdir(audio_path_dir)
+    audio_path = audio_path_dir + '/' + best_video(filepaths)
 
-    audio_path = ''
-    for fp in filepaths:
-        if '.webm' in fp:
-            audio_path = fp
-        if '.mkv' in fp:
-            audio_path = fp
-    audio_path = audio_path_dir + '/' + audio_path
 
-    print(video_path)
-    print(audio_path)
+    if not_blend:
+        print('Exiting early due to --not-blend flag')
+        return
 
+    print('About to blend...')
     title = flags['upload']['title']
     command = f'python3 blend {video_path} {audio_path} --output-filepath "{title}".mkv'
     check_output(command, shell=True)
+    print('Blending complete')
+
+    if not_upload:
+        print('Exiting early due to --not-upload flag')
+        return
+
+    print(f'About to upload as {title}')
+    upload_command = f'python3 upload_videos.py --file "{title}.mkv" --title "{title}" --description "{flags["audio"]["search_terms"] + " " + flags["video"]["search_terms"]}"'
+    check_output(upload_command, shell=True)
+    print('Upload complete')
+
+
+def best_video(filepaths):
+    for fp in filepaths:
+        if '.webm' in fp:
+            return fp
+        if '.mp4' in fp:
+            return fp
+        if '.mkv' in fp:
+            return fp
+
+
+def print_creative_commons_blender():
+    print('''
+       _____                _   _
+      / ____|              | | (_)
+     | |     _ __ ___  __ _| |_ ___   _____
+     | |    | '__/ _ \\/ _` | __| \\ \\ / / _ \\
+     | |____| | |  __| (_| | |_| |\\ V |  __/
+      \\_____|_|  \\___|\\__,_|\\__|_| \\_/ \\___|
+      / ____|
+     | |     ___  _ __ ___  _ __ ___   ___  _ __  ___
+     | |    / _ \\| '_ ` _ \\| '_ ` _ \\ / _ \\| '_ \\/ __|
+     | |___| (_) | | | | | | | | | | | (_) | | | \\__ \\
+      __________/|_| |_| |_|__ |_| |_|\\___/|_| |_|___/
+
+                   _______|___|______
+                __|__________________|
+                \  ]________________[ `---.
+                 `.                   ___  |
+                  |   _              |   | |
+                  | .'_`--.___   __  |   | |
+                  |( 'o`   - .`.'_ ) |   | |
+                  | `-._      `_`./_ |  / /
+                  |   '/\\\\    ( .'/ )|.' /
+                  \\ ,__//`---'`-'_   |__/  .'
+                   \\/-'        '/  /.'
+                    \\            '/'
+                     | `.`-. .-'.'|
+                     |  `.-'.-'   |
+                     |__(__(___)__|
+                     /            \\
+                    /              \\
+                    |______________|
+        ''')
 
 
 if __name__ == '__main__':

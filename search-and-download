@@ -11,13 +11,13 @@ import click
 
 @click.command()
 @click.argument('search_terms', nargs=-1)
-@click.option('--count')
-@click.option('--creative-commons', is_flag=True)
-@click.option('--res-4k', is_flag=True)
-@click.option('--res-HD', is_flag=True)
+@click.option('--count', type=int, help='Number of videos to download', default=1)
+@click.option('--creative-commons', is_flag=True, help='Filter to only Creative Commons videos')
+@click.option('--res-4k', is_flag=True, help='Filter to only 4k resolution videos')
+@click.option('--res-HD', is_flag=True, help='Filter to only HD resolution videos')
 def search_and_download(search_terms, count, creative_commons, res_4k, res_hd):
     '''This script searchs for videos Youtube for Creative Commons which match the given terms, then downloads them.'''
-
+    print(count)
     base_url = 'https://www.youtube.com/results?search_query='
 
     creative_commons_filter = '&sp=EgIwAQ%253D%253D'

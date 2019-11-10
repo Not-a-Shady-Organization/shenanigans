@@ -53,7 +53,7 @@ def download(yaml_file, not_blend, not_upload):
 
     print('About to blend...')
     title = flags['upload']['title']
-    command = f'python3 blend {video_path} {audio_path} --output-filepath "{title}".mkv'
+    command = f'python3 blend {video_path} {audio_path} --output-filepath "output-videos/{title}".mkv'
     check_output(command, shell=True)
     print('Blending complete')
 

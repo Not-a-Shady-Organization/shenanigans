@@ -2,7 +2,7 @@ from google.cloud import pubsub_v1
 import time
 import yaml
 import argparse
-
+import ntpath
 
 def publish_yaml_message(yaml_filepath):
     project_id = 'ccblender'
@@ -16,7 +16,6 @@ def publish_yaml_message(yaml_filepath):
     with open(yaml_filepath) as f:
         yaml_dict = yaml.full_load(f)
 
-
     def get_callback(f, data):
         def callback(f):
             try:
@@ -26,12 +25,15 @@ def publish_yaml_message(yaml_filepath):
                 print('Please handle {} for {}.'.format(f.exception(), data))
         return callback
 
+    filename = ntpath.basename(yaml_filepath)
 
     data = str(yaml_dict)
     futures.update({data: None})
     # When you publish a message, the client returns a future.
     future = publisher.publish(
-        topic_path, data=data.encode('utf-8')  # data must be a bytestring.
+        topic_path,
+        data=data.encode('utf-8'),  # data must be a bytestring.
+        filename=filename
     )
     futures[data] = future
     # Publish failures shall be handled in the callback function.

@@ -10,7 +10,7 @@ import click
 @click.command()
 @click.argument('video_source')
 @click.argument('audio_source')
-@click.option('--output-filepath', default='blend.mp4')
+@click.option('--output-filepath', default='blended-videos/blend.mkv')
 def blend(video_source, audio_source, output_filepath):
     safe_filepath = lambda filepath: filepath.replace(' ', '\\ ')
 
@@ -18,7 +18,7 @@ def blend(video_source, audio_source, output_filepath):
     desired_audio_video = safe_filepath(audio_source)
     output_path = safe_filepath(output_filepath)
 
-    cross_streams_command = f'/usr/local/bin/ffmpeg -i {desired_visual_video} -i {desired_audio_video} -c copy -map 0:v:0 -map 1:a:0 -shortest {output_path}'
+    cross_streams_command = f'/usr/local/bin/ffmpeg -y -i {desired_visual_video} -i {desired_audio_video} -c copy -map 0:v:0 -map 1:a:0 -shortest {output_path}'
     check_output(cross_streams_command, shell=True)
 
 

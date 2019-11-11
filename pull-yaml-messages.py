@@ -12,12 +12,12 @@ subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(project_id, subscription_name)
 
 
-def upload_blob(bucket_name, data_string, destination_blob_name):
+def upload_blob(bucket_name, data_string, destination_blob_name, success_state):
     """Uploads a file to the bucket."""
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
-    blob.upload_from_string(data_string)
+    blob.upload_from_string(str.encode(f'Succeeded: {success_state}\n') + data_string)
     print(f'File uploaded to {destination_blob_name}')
 
 
@@ -27,12 +27,20 @@ def callback(message):
     yaml_dict = yaml.full_load(message.data)
 
     message.ack()
+    try:
+        download(message.data)
+        success_state = True
+        print('Blend & upload succeeded')
+    except:
+        success_state = False
+        print('Blending failed')
+
     upload_blob(
         'video-blend-requests-bucket',
         message.data,
-        message.attributes.get('filename')
+        message.attributes.get('filename'),
+        success_state
     )
-    download(message.data)
 
 
 subscriber.subscribe(subscription_path, callback=callback)

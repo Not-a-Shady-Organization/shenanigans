@@ -10,7 +10,7 @@ import click
 @click.command()
 @click.argument('video_source')
 @click.argument('audio_source')
-@click.option('--output-filepath', default='output-videos/blend.mkv')
+@click.option('--output-filepath', default='blended-videos/blend.mkv')
 def blend(video_source, audio_source, output_filepath):
     safe_filepath = lambda filepath: filepath.replace(' ', '\\ ')
 

@@ -1,5 +1,6 @@
 import time
-
+import yaml
+from end_to_end import download
 from google.cloud import pubsub_v1
 
 project_id = 'ccblender'
@@ -12,6 +13,10 @@ subscription_path = subscriber.subscription_path(project_id, subscription_name)
 
 def callback(message):
     print('Received message: {}'.format(message))
+
+    yaml_dict = yaml.full_load(message.data)
+    download(message.data)
+
     message.ack()
 
 subscriber.subscribe(subscription_path, callback=callback)

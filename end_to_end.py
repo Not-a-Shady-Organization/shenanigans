@@ -3,23 +3,22 @@
 from subprocess import check_output
 import requests
 import sys
-import click
 import yaml
 import os
+import argparse
 from search_and_download import search_and_download
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-@click.command()
-@click.argument('yaml-file')
-@click.option('--not-blend', is_flag=True)
-@click.option('--not-upload', is_flag=True)
-def download(yaml_file, not_blend, not_upload):
+def download(yaml_file, not_blend=False, not_upload=False):
     print_creative_commons_blender()
 
-    with open(yaml_file) as f:
-        flags = yaml.full_load(f)
+    try:
+        flags = yaml.full_load(yaml_file)
+    except:
+        with open(yaml_file) as f:
+            flags = yaml.full_load(f)
 
     video_path_dir = os.path.dirname(os.path.realpath(__file__)) + '/videos/' + flags['video']['search_terms'].replace(" ", '_')
     downloaded_videos = search_and_download(
@@ -53,7 +52,7 @@ def download(yaml_file, not_blend, not_upload):
 
     print('About to blend...')
     title = flags['upload']['title']
-    command = f'python3 blend {video_path} {audio_path} --output-filepath "output-videos/{title}".mkv'
+    command = f'python3 blend {video_path} {audio_path} --output-filepath "blended-videos/{title}".mkv'
     check_output(command, shell=True)
     print('Blending complete')
 
@@ -62,7 +61,8 @@ def download(yaml_file, not_blend, not_upload):
         return
 
     print(f'About to upload as {title}')
-    upload_command = f'python3 upload_videos.py --file "{title}.mkv" --title "{title}" --description "{flags["audio"]["search_terms"] + " " + flags["video"]["search_terms"]}"'
+    upload_command = f'python3 upload_videos.py --file "blended-videos/{title}.mkv" --title "{title}" --description "{flags["audio"]["search_terms"] + " " + flags["video"]["search_terms"]}"'
+    print('Uploading...')
     check_output(upload_command, shell=True)
     print('Upload complete')
 
@@ -113,4 +113,10 @@ def print_creative_commons_blender():
 
 
 if __name__ == '__main__':
-    download()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('yaml_file')
+    parser.add_option('--not-blend', dest='not_blend', action='store_true')
+    parser.add_option('--not-upload', dest='not_upload', action='store_true')
+    args = parser.parse_args()
+
+    download(yaml_file, not_blend, not_upload)
